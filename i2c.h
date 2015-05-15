@@ -12,7 +12,7 @@
  * Version: 1.0
  *
  * Dependancies:
- * SIM800.h
+ * 
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  *
@@ -36,14 +36,24 @@
 
 #ifndef I2C_H
 #define I2C_H
+/*********************************************************************
+Defines
+********************************************************************/
 /** The \p ack_or_nack argument for i2c_byte().
     The values of this enum currently match the value we pass to ACKDT. */
 enum i2c_ack {
   /** Don't acknowledge. */
   I2C_NACK = 1,
   /** Do acknowledge. */
-  I2C_ACK = 0 
+  I2C_ACK = 0
   };
+/*********************************************************************
+Globals
+********************************************************************/
+
+/*********************************************************************
+Function prototypes
+********************************************************************/
 
 void Init_I2C1(void);
 void DisI2C1(void);

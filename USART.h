@@ -4,7 +4,7 @@
  *          Will Anthony <will@affinityengineering.com.au>
  * Description: This is the header file for onboard USART transciever functionality.
  *
- * Language: C
+ * Language: C (CCI)
  * Coding Standard: NASA JPL DOCID D-60411
  * Style: NASA SEL-94-003
  * License: GNU GPL version 3.0
@@ -39,33 +39,38 @@
 
 #ifndef USART_H
 #define USART_H
-
-#include <xc.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /*********************************************************************
 Defines
- ********************************************************************/
+********************************************************************/
 
 /*********************************************************************
 Globals
- ********************************************************************/
+********************************************************************/
 extern volatile unsigned char DataRXflag;
+extern volatile char URXbuf[];
+extern volatile unsigned int RXbufCnt;
+extern volatile unsigned char DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
+extern volatile unsigned int tic1, tic2, tic3;
 /*********************************************************************
 Function prototypes
- ********************************************************************/
+********************************************************************/
 void initUSART();
 void USARTTX(unsigned char);
 void USARTTXstg(unsigned char*);
 void USARTRX(unsigned char*);
-void Dis_USART(void); //TODO transition this if needed to the USART lib
-void UART2PutChar(char); //TODO transition this if needed to the USART lib
-char UART2GetChar(void); //TODO transition this if needed to the USART lib
-void UART2PrintString(char*); //TODO transition this if needed to the USART lib
+void Dis_USART(void); 
+void UART2PutChar(char); 
+char UART2GetChar(void);
+void UART2PrintString(char*);
 
 //********************************************************************
 
-
+#ifdef	__cplusplus
+}
 #endif
+
+#endif /* USART_H */

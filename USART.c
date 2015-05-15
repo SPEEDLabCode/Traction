@@ -37,14 +37,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Include Global Parameters */
 
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include "USART.h"
 
-
-extern volatile char URXbuf[];
-extern volatile unsigned int RXbufCnt;
-extern volatile unsigned char DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
-extern volatile unsigned int tic1, tic2, tic3;
 
 /********************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)

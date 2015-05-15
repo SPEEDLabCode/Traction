@@ -40,272 +40,35 @@
 extern "C" {
 #endif
 
+/*********************************************************************
+Defines
+********************************************************************/
+
+/*********************************************************************
+Globals
+********************************************************************/
+
+/*********************************************************************
+Function prototypes
+********************************************************************/
+
     /* Housekeeping Functions */
-    bool CMDecho(bool);
-    /* FUNCTION: CMDecho()
-     * PURPOSE : Set the command echo output of the module on or off
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    echo    true sets module to echo all command strings
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     * This function is only really required if using a user-interactive terminal session,
-     * otherwise this can create additional bus congestion for no benefit.
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
+    bool CMDecho(bool); 
     bool SetSMSFormat(bool);
-    /* FUNCTION: SetSMSFormat()
-     * PURPOSE : Switch between data and text format for SMS messages
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    text    true for text mode, false for data mode
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
+   
     /* Operational Functions */
-
-
     void ATcommand(char*);
-    /* FUNCTION: ATcommand()
-     * PURPOSE : Automate the USART transmission of AT commands
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  string  DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
-
     void SMSnumber(char*);
-    /* FUNCTION: SMSnumber()
-     * PURPOSE : Automate the USART transmission of the phone number string
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    phone number
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * ATstg();
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
     void SMStext(char*);
-    /* FUNCTION: SMStext()
-     * PURPOSE : Automate the USART transmission of SMS message content
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
     void ATstg(char*);
-    /* FUNCTION: ATstg()
-     * PURPOSE : Automate the USART transmission of unformatted strings
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
     char SendReply(char *, char *);
-    /* FUNCTION: SendReply()
-     * PURPOSE : Return a reply SMS message
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    NUM     Phone number to contact
-     *  character string    DATA    Contents of text message
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  true/false indication of function success //FIXME set this instead of char?
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     * SMSnumber();
-     * SMStext();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
     bool Hangup(void);
-    /* FUNCTION: Hangup()
-     * PURPOSE : Terminate a call session
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
     bool ChannelQual(void);
-    /* FUNCTION: ChannelQual()
-     * PURPOSE : Query the quality of the mobile network connection
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
-    //Bluetooth Functions
+   
+    /* Bluetooth Functions */
     bool BTpower(bool);
-    /* FUNCTION: BTpower()
-     * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    Test    Sets device test mode
-     *  bool    Power   Set BT module on or off
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
-
     bool BTstatus(bool);
-    /* FUNCTION: BTstatus()
-     * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool  Test    Sets device test mode
-     *  bool    Power   Set BT module on or off
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
-
-
-
-
+    
 
 #ifdef	__cplusplus
 }
