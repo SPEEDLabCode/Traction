@@ -18,6 +18,10 @@
  *
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
+ * 
+ * Reference Document: PIC24FJ256GB110 Family Data Sheet
+ * Document Number: DS39897C
+ * Revision / Date: C / 16 DEC 2009
  *
  * Created on 02 March 2014, 11:23 AM
  * Copyright (C) 2014-2015  Affinity Engineering pty ltd

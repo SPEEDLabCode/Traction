@@ -12,12 +12,19 @@
  * Version: 1.0
  *
  * Dependancies:
- * USART.h
+ * 
+ * 
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
+ * 
+ * Reference Document: u-blox M8 Reciever Description Including Protocol Specification
+ * Document Number: UBX-13003221-R08
+ * Revision / Date: R08 / 4 DEC 2014
  *
  * Created on 27 April 2015, 11:23 AM
- * Copyright (C) 2010-2015  Affinity Engineering pty ltd
+ * Copyright (C) 2010-2015  Affinity Engineering pty. ltd.
+ * <http://www.affinityengineering.com.au>
+ * <http://github.com/SPEEDLabCode>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
