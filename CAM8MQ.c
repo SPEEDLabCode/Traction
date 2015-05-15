@@ -1,8 +1,9 @@
 /*
- * File:   CAM8MQ.h
+ * File:   CAM8MQ.c
  * Author:  Eric Freund <eric@affinityengineering.com.au>
  *          Will Anthony <will@affinityengineering.com.au>
- * Description: This is the header file for the ublox CAM-8MQ GNSS navigation module.
+ * Description: This is the source file for the ublox CAM-8MQ GNSS navigation module
+ * function library. 
  *
  *
  * Language: C
@@ -15,6 +16,10 @@
  * USART.h
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
  *
  * Created on 27 April 2015, 11:23 AM
  * Copyright (C) 2010-2015  Affinity Engineering pty ltd
@@ -37,10 +42,10 @@
 
 /* Includes */
 
-#include "USART.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include "CAM8MQ.h"
+#include "USART.h"
 
 /* Defines */
 //UBX protocol class ID's
@@ -63,6 +68,7 @@
 struct UBXPacket
 /* This struct holds the variables for the UBX protocol packet
     in the order the packet is sent.*/
+//TODO structure this correctly!
 {
     const uint8_t synchChar1 = 0xB5; //Per ublox protocol spec
     const uint8_t synchChar2 = 0x62; //Per ublox protocol spec
@@ -71,15 +77,39 @@ struct UBXPacket
     uint16_t payloadLength = 0;
 };
 
-
-#include "gps.h"
-#include <xc.h>
-//#include "P24FJ256GB106.h"
-//#include "HardwareProfile - UAVrevA.h"
-
 /***************************************************************************************/
 
-void gps_comand(unsigned char* GPS_CMD)
+void gps_NMEA_comand(unsigned char* GPS_CMD)
+/* FUNCTION: gps_NMEA_command()
+ * PURPOSE : Send a command to the CAM-8 GNSS module using the NMEA protocol.
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * VARIABLES:
+ *
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
+ * SECTION:
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 13 MAY 2015
+ *F*/
 {
     unsigned long i;
     unsigned char check_sum = 0;
@@ -111,7 +141,74 @@ void gps_comand(unsigned char* GPS_CMD)
     }
 }
 
+void gps_UBX_command(unsigned char* command)
+/* FUNCTION: gps_UBX_command()
+ * PURPOSE : Send a command to the CAM-8 GNSS module using the u-blox UBX
+ * protocol.
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * VARIABLES:
+ *
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
+ * SECTION:
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 13 MAY 2015
+ *F*/
+{
+
+}
+
 void gps_chksum(unsigned char n, unsigned char* GPS_CMD)
+/* FUNCTION: gps_chksum()
+ * PURPOSE : Perform checksum checking on GNSS status words
+ * ARGUMENTS:
+ *  Type                    Name        Desc.
+ *  unsigned char           n
+ * unsigned char pointer   GPS_CMD
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * VARIABLES:
+ *
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
+ * SECTION:
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 13 MAY 2015
+ *F*/
 // string always is 6 longer after this process
 {
     unsigned long i;
@@ -131,6 +228,71 @@ void gps_chksum(unsigned char n, unsigned char* GPS_CMD)
 }
 
 void PollJammingDetection(void)
+/* FUNCTION: PollJammingDetection()
+ * PURPOSE : Query the CAM-8's onboard jamming and interference detection
+ * system.
+ * ARGUMENTS:
+ *  Type                    Name        Desc.
+ *
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * VARIABLES:
+ *
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
+ * SECTION: 21.11.8.1
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+  * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 13 MAY 2015
+ *F*/
+{
+
+}
+
+void ConfigJammingDetection(unsigned char *configWord)
+/* FUNCTION: ConfigJammingDetection()
+ * PURPOSE : Configure the CAM-8's onboard jamming and interference detection
+ * system.
+ * ARGUMENTS:
+ *  Type                    Name        Desc.
+ *  unsigned char pointer   configWord
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * VARIABLES:
+ *
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT: u-blox M8 Reciever Description Including Protocol Specification
+ * DOCUMENT NUMBER: UBX-13003221-R08
+ * REVISION / DATE: R08 / 4 DEC 2014
+ * SECTION: 21.11.8.2
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+  * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 13 MAY 2015
+ *F*/
 {
 
 }

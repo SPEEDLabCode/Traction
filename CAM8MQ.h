@@ -51,9 +51,13 @@ Globals
 /*********************************************************************
 Function prototypes
 ********************************************************************/
-    void gps_comand(unsigned char*);
+    void gps_NMEA_comand(unsigned char*);
+    void gps_UBX_command(unsigned char*);
 
     void gps_chksum(unsigned char, unsigned char*);
+
+    void PollJammingDetection(void);
+    void ConfigJammingDetection(unsigned char*);
 
 
 #ifdef	__cplusplus

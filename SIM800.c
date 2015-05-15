@@ -18,6 +18,10 @@
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  *
+ * REFERENCE DOCUMENT: SIM800 Series AT Command Manual
+ * DOCUMENT NUMBER: SIM800Series_AT_CommandManual_V1.05
+ * REVISION / DATE: 1.05 / 31 JUL 2014
+ *
  * Created on 16 April 2015, 11:43 PM
  * Copyright (C) 2015  Affinity Engineering pty ltd
 
@@ -53,26 +57,26 @@ struct channel
 
 void ATcommand(char *DATA)
 /* FUNCTION: ATcommand()
-     * PURPOSE : Automate the USART transmission of AT commands
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  string  DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Automate the USART transmission of AT commands
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *  string  DATA    characters to transmit
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 
 {
     //FIXME validate input!
@@ -88,34 +92,34 @@ void ATcommand(char *DATA)
 
 void SMSnumber(char *DATA)
 /* FUNCTION: SMSnumber()
-     * PURPOSE : Automate the USART transmission of the phone number string
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    phone number
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * ATstg();
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Automate the USART transmission of the phone number string
+ * ARGUMENTS:
+ *  Type                Name    Desc.
+ *  character string    DATA    phone number
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * ATstg();
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     //FIXME validate input!
     ATstg("AT+CMGS=");
     USARTTX(0x22); //"
     while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
     {
-        USARTTX(*DATA++);   //FIXME should be USARTTXstg()?
+        USARTTX(*DATA++); //FIXME should be USARTTXstg()?
     }
     USARTTX(0x22); //"
     USARTTX(0x0D); //<cr>
@@ -123,27 +127,27 @@ void SMSnumber(char *DATA)
 //********************************************************************
 
 void SMStext(char* DATA)
- /* FUNCTION: SMStext()
-     * PURPOSE : Automate the USART transmission of SMS message content
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+/* FUNCTION: SMStext()
+ * PURPOSE : Automate the USART transmission of SMS message content
+ * ARGUMENTS:
+ *  Type                Name    Desc.
+ *  character string    DATA    characters to transmit
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     //FIXME validate input!
     while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
@@ -156,26 +160,26 @@ void SMStext(char* DATA)
 
 void ATstg(char* DATA)
 /* FUNCTION: ATstg()
-     * PURPOSE : Automate the USART transmission of unformatted strings
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    DATA    characters to transmit
-     * RETURN :
-     *  Type    Name    Desc.
-     *  void
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Automate the USART transmission of unformatted strings
+ * ARGUMENTS:
+ *  Type                Name    Desc.
+ *  character string    DATA    characters to transmit
+ * RETURN :
+ *  Type    Name    Desc.
+ *  void
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     //FIXME validate input!
     while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
@@ -188,29 +192,33 @@ void ATstg(char* DATA)
 
 char SendReply(char *NUM, char *DATA) //TODO check on the logic and flow control of this and ensure that there isn't some wasted stuff in here!
 /* FUNCTION: SendReply()
-     * PURPOSE : Return a reply SMS message
-     * ARGUMENTS:
-     *  Type                Name    Desc.
-     *  character string    NUM     Phone number to contact
-     *  character string    DATA    Contents of text message
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  true/false indication of function success //FIXME set this instead of char?
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     * SMSnumber();
-     * SMStext();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * E. Freund <eric@affinityengineering.com.au>
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Return a reply SMS message
+ * ARGUMENTS:
+ *  Type                Name    Desc.
+ *  character string    NUM     Phone number to contact
+ *  character string    DATA    Contents of text message
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  true/false indication of function success //FIXME set this instead of char?
+ *
+ * DEPENENCIES:
+ * ATcommand();
+ * SMSnumber();
+ * SMStext();
+ *
+ * NOTES :
+ * REFERENCE DOCUMENT: SIM800 Series AT Command Manual
+ * DOCUMENT NUMBER: SIM800Series_AT_CommandManual_V1.05
+ * REVISION / DATE: 1.05 / 31 JUL 2014
+ * SECTION:
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     //FIXME validate input!
     OKflg = 0xFF;
@@ -236,29 +244,28 @@ char SendReply(char *NUM, char *DATA) //TODO check on the logic and flow control
 }
 //********************************************************************
 
-
 bool BTpower(bool Test, bool Power)
 /* FUNCTION: BTpower()
-     * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    Test    Sets device test mode
-     *  bool    Power   Set BT module on or off
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *  bool    Test    Sets device test mode
+ *  bool    Power   Set BT module on or off
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
 
     bool status = false; /* return variable for success or failure of operation*/
@@ -288,33 +295,33 @@ bool BTpower(bool Test, bool Power)
 
 bool BTstatus(uint8_t command)
 /* FUNCTION: BTstatus()
-     * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool  Test    Sets device test mode
-     *  bool    Power   Set BT module on or off
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Set the Bluetooth module power on or off and conduct self-test
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *  bool  Test    Sets device test mode
+ *  bool    Power   Set BT module on or off
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
-    
+
     bool status = false;
-//TODO if statement that validates input command and performs query to BT module
+    //TODO if statement that validates input command and performs query to BT module
 
     //TODO if statement that parses BT module response, and if correct sets return status variable == true for success
-    
+
     return status;
 
 }
@@ -322,28 +329,28 @@ bool BTstatus(uint8_t command)
 
 bool CMDecho(bool echo)
 /* FUNCTION: CMDecho()
-     * PURPOSE : Set the command echo output of the module on or off
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    echo    true sets module to echo all command strings
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     * This function is only really required if using a user-interactive terminal session,
-     * otherwise this can create additional bus congestion for no benefit.
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Set the command echo output of the module on or off
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *  bool    echo    true sets module to echo all command strings
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ * This function is only really required if using a user-interactive terminal session,
+ * otherwise this can create additional bus congestion for no benefit.
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     if (echo == true)
     {
@@ -359,25 +366,25 @@ bool CMDecho(bool echo)
 
 bool Hangup(void)
 /* FUNCTION: Hangup()
-     * PURPOSE : Terminate a call session
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * USARTTX();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+ * PURPOSE : Terminate a call session
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * USARTTX();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     bool status = false;
     ATcommand("H"); //FIXME ensure we are passing the letter "H" properly
@@ -391,26 +398,26 @@ bool Hangup(void)
 //********************************************************************
 
 bool SetSMSFormat(bool text)
- /* FUNCTION: SetSMSFormat()
-     * PURPOSE : Switch between data and text format for SMS messages
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *  bool    text    true for text mode, false for data mode
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+/* FUNCTION: SetSMSFormat()
+ * PURPOSE : Switch between data and text format for SMS messages
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *  bool    text    true for text mode, false for data mode
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * ATcommand();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     bool status = false;
 
@@ -432,30 +439,30 @@ bool SetSMSFormat(bool text)
 //********************************************************************
 
 bool ChannelQual(void)
- /* FUNCTION: ChannelQual()
-     * PURPOSE : Query the quality of the mobile network connection
-     * ARGUMENTS:
-     *  Type    Name    Desc.
-     *
-     * RETURN :
-     *  Type    Name    Desc.
-     *  bool    status  function error return, true == success
-     *
-     * DEPENENCIES:
-     * ATcommand();
-     *
-     * NOTES :
-     *
-     * VER: 1.0
-     * PROGRAMMER:
-     * W. Anthony <will@affinityengineering.com.au>
-     *
-     * DATE: 18 APR 2015
-     *F*/
+/* FUNCTION: ChannelQual()
+ * PURPOSE : Query the quality of the mobile network connection
+ * ARGUMENTS:
+ *  Type    Name    Desc.
+ *
+ * RETURN :
+ *  Type    Name    Desc.
+ *  bool    status  function error return, true == success
+ *
+ * DEPENENCIES:
+ * ATcommand();
+ *
+ * NOTES :
+ *
+ * VER: 1.0
+ * PROGRAMMER:
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 18 APR 2015
+ *F*/
 {
     bool status = false;
-    
-    ATcommand("+CSQ");  //send channel status command
+
+    ATcommand("+CSQ"); //send channel status command
 
     //TODO read in response
 
