@@ -5,7 +5,11 @@
  * Description: This is the Main file for the Traction device.  The Traction
  * contains a Microchip PIC24FJ256GBxxx family microcontroller, therefore
  * there are references to hardware addresses and registers throughout this
- * code.
+ * code.  The USB functionality relies on code supplied by the Microchip
+ * Libraries for Applications (MLA) which can be found at 
+ * <http://www.microchip.com/pagehandler/en-us/devtools/mla/home.html>.  These
+ * libraries may be installed differently for each user, it is the user's 
+ * responsibility to locate the appropriate libraries for USB operation.
  *
  * Language: C
  * Coding Standard: NASA JPL DOCID D-60411
@@ -13,7 +17,11 @@
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
+ * usb_config.h
+ * usb_device.h
+ * usb.h
+ * usb_function_cdc.h
  * 
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
@@ -21,6 +29,11 @@
  * Reference Document: PIC24FJ256GB110 Family Data Sheet
  * Document Number: DS39897C
  * Revision / Date: C / 16 DEC 2009
+ * 
+ * Notes: The main does not perform any validation of inputs or outputs to functions itself.  This must be 
+ * provided by any functions that are written within the main or other libraries as needed.  It is the 
+ * responsibility of the programmer to ensure that data being operated on is of the correct type
+ * and within safe bounds.
  *
  * Created on 10 July 2012, 11:23 AM
  * Copyright (C) 2012-2015  Affinity Engineering pty. ltd.
@@ -43,24 +56,27 @@
 
 /*********************************************************************
 
-/** INCLUDES *******************************************************/
+/* INCLUDES *******************************************************/
 #include <xc.h>
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-//#include "usb_config.h"
+//USB Specific libraries
+#include "usb_config.h"
+#include "usb.h"
+#include "usb_device.h"
+#include "usb_function_cdc.h"
 
-//#include "./USB/usb_device.h"
-//#include "./USB/usb.h"
-//#include "./USB/usb_function_cdc.h"
-//#include "globals.h"
+
+//Hardware device specific libraries
 #include "i2c.h"
 #include "Timer1.h"
 #include "OLED.h"
 #include "USART.h"
-//#include "USART2.h"
 #include "CAM8MQ.h"
 #include "SIM800.h"
-#include "HardwareSIM900.h"
+#include "TractionHardware.h"
 
 /* Microcontroller Basic Configuration */
 _CONFIG1(JTAGEN_OFF & GCP_OFF & GWRP_OFF & ICS_PGx3 & FWDTEN_OFF & WINDIS_OFF);
@@ -76,17 +92,16 @@ volatile char USB_Out_Buffer[CDC_DATA_OUT_EP_SIZE] = {0};
 volatile char RS232_Out_Data[CDC_DATA_IN_EP_SIZE] = {0};
 volatile char CMD_String[CDC_DATA_IN_EP_SIZE] = {0};
 
-volatile unsigned char NextUSBOut = 0;
-//char RS232_In_Data;
+volatile uint8_t NextUSBOut = 0;
 volatile uint8_t LastRS232Out = 0; // Number of characters in the buffer
-volatile unsigned char CMD_String_cp;
+volatile uint8_t CMD_String_cp;
 
 volatile char URXbuf[256];
 volatile uint16_t RXbufCnt;
 volatile uint8_t DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
 
 volatile char URXbuf2[256];
-volatile unsigned int RXbuf2Cnt;
+volatile uint16_t RXbuf2Cnt;
 volatile uint8_t DataRX2flag;
 
 volatile uint16_t tic1, tic2, tic3;
@@ -95,40 +110,24 @@ uint8_t RS232_Out_Data_Rdy = 0;
 USB_HANDLE lastTransmission = 0;
 
 /** PRIVATE PROTOTYPES *********************************************/
-static void InitializeSystem(void);
+static void InitializeSystem(void);     //FIXME why would a function prototype like this be called out as static?
 void ProcessIO(void);
 //void USBDeviceTasks(void);
-int8_t nibtohex(uint8_t, int8_t);
+int8_t NibtoHex(uint8_t, int8_t);
 
 /********************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _DefaultInterrupt(void)
 {
-    Nop();
-    Nop(); //Place 2nd breakpoint here
-    //asm volatile("RESET");	//Soft reset
-    Nop();
-    Nop();
-    Nop();
+    Nop();  //NOTE: Nop() inserted as positions for debug breakpoints
+    
     while (1); //{Sleep()}; //Trap
 }
 
 /********************************************************************/
 int main(void)
 {
-    int16_t i = 0, j, k, zz = 99;
-    char buf[5] = "ATE0";
-    char buf1[10] = "AT+CMGF=1"; // Set text entry mode
-    char buf2[23] = "AT+CMGS= 0433884656 "; // Number to send SMS to. note quotes are added manually
-    buf2[8] = 0x22; // We need to write a function that takes ph# and pointer to string
-    buf2[19] = 0x22; // Then constructs the command set and sends it.
-    char buf3[23] = "This is a test of SMS "; // Text for test SMS
-    buf3[22] = 0x1A;
-    char buf4[18] = "AT+CNMI=1,2,2,0,1"; //Display all incoming SMS
-    char SMSTXT [160] = {0};
-    char SMSPHNO [13] = {0};
-    char PriNum [13] = {0};
-    char haveSMS = 0;
-    char AlarmValHi = 99, AlarmH = 0, AlarmValLo = 99, AlarmL = 0;
+    int16_t i = 0;  //Counter for processing IO 
+    //FIXME why is this a signed int?
     
     InitializeSystem();
     crtX = 0;
@@ -136,18 +135,16 @@ int main(void)
     Gotoxy(0, 0);
     print_string_XY("system boot!\r\n", 0, 0);
 
-    PWRON = 1;
+    SIM800PWR = 1;
     tic2 = 200;
     while (tic2);
-    PWRON = 0;
+    SIM800PWR = 0;  //TODO why do we turn the SIM800 on and then off again?
     print_string_XY("Power\r\n", 0, 0);
 
     USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
     //variables to known states.
     USBDeviceAttach();
     memset(CMD_String, 0, CDC_DATA_IN_EP_SIZE); //Clear command string
-
-    //	while (CMD_String[CMD_String_cp-1] !=0x47) ProcessIO();
 
 /* Main program loop */
     while (1)
@@ -181,7 +178,7 @@ static void InitializeSystem(void)
     _ROSEL = 1;
     _ROON = 1;
     _TRISB8 = 1;
-    _LATB9 = 1; //GPS ON
+    GPSPWR = 1; //GPS Power ON
 
     RCONbits.VREGS = 0; /* Disable regulator in sleep mode */
     AD1PCFGL = 0xFFFF;
@@ -190,40 +187,49 @@ static void InitializeSystem(void)
     initOLED();
     initTimer1();
     initUSART();
-    initUSART2();
 
 }//end InitializeSystem
 
-/********************************************************************
- * Function:        void ProcessIO(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This function is a place holder for other user
- *                  routines. It is a mixture of both USB and
- *                  non-USB tasks.
- *
- * Note:            None
- *******************************************************************/
 void ProcessIO(void)
+/* FUNCTION: ProcessIO()
+ * PURPOSE : Perform USB CDC IO tasks
+ *
+ * ARGUMENTS:
+ *  Type            Name        Desc.
+ *  NONE
+ *
+ * RETURN :
+ *  Type            Name        Desc.
+ *  NONE
+ *
+ * DEPENENCIES:
+ * NONE
+ *
+ * VARIABLES:
+ *  Type            Name            Desc.
+ *  unsigned char   i               counter variable
+ *  unsigned char   NumBytesIn      number of bytes to be transferred
+ *  char string     USB_In_Buffer[] USB data buffer size, set by USB libs (const)
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT:
+ * DOCUMENT NUMBER: 
+ * REVISION / DATE: 
+ * SECTION:
+ *
+ * VER: 1.1
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ * W. Anthony <will@affinityengineering.com.au>
+ *
+ * DATE: 30 MAY 2015
+ *F*/
 {
-    unsigned char i, NumBytesIn;
-    char USB_In_Buffer[CDC_DATA_OUT_EP_SIZE];
+    uint8_t i = 0, NumBytesIn = 0;
+    const uint8_t USB_In_Buffer[CDC_DATA_OUT_EP_SIZE];
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
 
-    //	if(mDataRdyUSART())
-    //	{
-    //		USB_Out_Buffer[NextUSBOut] = getcUSART();
-    //		++NextUSBOut;
-    //		USB_Out_Buffer[NextUSBOut] = 0;
-    //	}
     NumBytesIn = getsUSBUSART(USB_In_Buffer, CDC_DATA_IN_EP_SIZE);
     if (NumBytesIn > 0)
     {
@@ -242,26 +248,209 @@ void ProcessIO(void)
     }
 
     CDCTxService();
-} //end ProcessIO
+} /* END ProcessIO() */
 
-/********************************************************************/
-int8_t nibtohex(uint8_t value, int8_t nibble)
+
+int8_t NibtoHex(uint8_t value, int8_t nibble)
+/* FUNCTION: NibtoHex()
+ * PURPOSE : Convert an input "nibble" into an output hexadecimal format number
+ *
+ * ARGUMENTS:
+ *  Type            Name        Desc.
+ *  unsigned char   value       hexadecimal value
+ *  char            nibble      half-byte to be converted
+ *
+ * RETURN :
+ *  Type            Name        Desc.
+ *  char            result      result of conversion
+ *
+ * DEPENENCIES:
+ * NONE
+ *
+ * VARIABLES:
+ *  Type            Name        Desc.
+ *  char            result      result of conversion algorithm
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT:
+ * DOCUMENT NUMBER: 
+ * REVISION / DATE: 
+ * SECTION:
+ *
+ * VER: 1.1
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ *
+ * DATE: 30 MAY 2015
+ *F*/
 {
-    int8_t temp;
+    int8_t result = 0;
     if (nibble == 0)
     {
-        temp = value & 0x0F;
-        if (temp > 9) temp += 7;
-        temp += 48;
+        result = value & 0x0F;
+        if (result > 9) result += 7;
+        result += 48;
     }
     else if (nibble == 1)
     {
-        temp = value >> 4;
-        if (temp > 9) temp += 7;
-        temp += 48;
+        result = value >> 4;
+        if (result > 9) result += 7;
+        result += 48;
     }
-    return temp;
+    return result;
+} /* END NibtoHex()*/
+
+uint8_t ScanKey(void)
+/* FUNCTION: ScanKey()
+ * PURPOSE : Scan the attached keyboard matrix and return the depressed keyswitch
+ *
+ * ARGUMENTS:
+ *  Type            Name        Desc.
+ *  NONE
+ *
+ * RETURN :
+ *  Type            Name        Desc.
+ *  unsigned char   i           hexadecimal value of depressed keyswitch
+ *
+ * DEPENENCIES:
+ * NONE
+ *
+ * VARIABLES:
+ *  Type                    Name        Desc.
+ *  unsigned char           i
+ *  unsigned char array     button[]    array of constants that represent key mapping
+ *  unsigned int            pressed
+ *  unsigned int            OLDTRISE
+ *  unsigned int            OLDTRISF
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT:
+ * DOCUMENT NUMBER: 
+ * REVISION / DATE: 
+ * SECTION:
+ *
+ * VER: 1.1
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ *
+ * DATE: 30 MAY 2015
+ *F*/
+{
+    uint16_t pressed = 0;
+    uint16_t OLDTRISE = 0, OLDTRISF = 0;
+    uint8_t i = 0;
+    const uint8_t button[17] = {0x43, 0x39, 0x38, 0x37, 0x44, 0x23, 0x30, 0x2A, 0x42, 0x36, 0x35, 0x34, 0x41, 0x33, 0x32, 0x31, 0x20}; //key mapping V
+
+    OLDTRISE = TRISE;   //FIXME why are we saving the tristate registers and not doing anything with them?
+    OLDTRISF = TRISF;
+    TRISE = 0b0000000000111010;
+    TRISF = 0b0000000000000001;
+
+    _LATD0 = 1;
+    Nop();
+    pressed = ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
+    _LATD0 = 0;
+    _LATD11 = 1;
+    pressed = pressed << 5;
+    pressed += ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
+    _LATD11 = 0;
+    _LATD8 = 1;
+    pressed = pressed << 5;
+    pressed += ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
+    _LATD8 = 0;
+
+    while (!(pressed & 0x0001)&&(i < 15))
+    {
+        i++;
+        pressed = pressed >> 1;
+    }
+
+    return button[i];
+}/* END ScanKey() */
+
+
+void clrBUF(char *DATA, uint8_t count)
+{
+    uint8_t i = 0;
+    for (i = 0; i < count; i++)
+    {
+        *DATA = 0;  //FIXME should we be incrementing the pointer as well?
+    }
+    
+}/* END clrBUF() */
+
+
+/********************************************************************/
+void InttoString(int i, char *p)
+/* FUNCTION: InttoString()
+ * PURPOSE : Convert an integer value to a string containing numbers
+ *
+ * ARGUMENTS:
+ *  Type            Name        Desc.
+ *  int             i           interger value to convert
+ *  char pointer    *p          pointer to string location
+ *
+ * RETURN :
+ *  Type            Name        Desc.
+ *  NONE
+ *
+ * DEPENENCIES:
+ * NONE
+ *
+ * VARIABLES:
+ *  Type                    Name        Desc.
+ *  const char array        digit[]     array of digits used to form output
+ *  int                     shifter     tracks shifting along the number line
+ *
+ * NOTES :
+ *
+ * REFERENCE DOCUMENT:
+ * DOCUMENT NUMBER: 
+ * REVISION / DATE: 
+ * SECTION:
+ *
+ * VER: 1.1
+ * PROGRAMMER:
+ * E. Freund <eric@affinityengineering.com.au>
+ *
+ * DATE: 30 MAY 2015
+ *F*/
+{
+    int shifter = i;
+    const char digit[] = "0123456789";
+    
+    if (i < 0)
+    {
+        *p++ = '-';
+        i *= -1;
+    }
+    
+    while(shifter)
+    { //Move to where representation ends
+        ++p;
+        shifter = shifter / 10;
+    }
+    *p = '\0';
+    while (i)
+    { //Move back, inserting digits as u go
+        *--p = digit[i % 10]; 
+        i = i / 10;
+    }
+} /* END InttoString() */
+
+/********************************************************************/
+void addstr(char *p, char *q) //p destination string pointer needs to be an array q string to add can be from quotes
+{
+    while (*p) p++;
+    while (*q)
+    {
+        *p++ = *q++;
+    }
+    *p++ = *q++;
 }
+/********************************************************************/
 
 // ******************************************************************************************************
 // ************** USB Callback Functions ****************************************************************
@@ -714,102 +903,5 @@ BOOL USER_USB_CALLBACK_EVENT_HANDLER(USB_EVENT event, void *pdata, WORD size)
     }
     return TRUE;
 }
-
-/********************************************************************
-This routine scans the keyboard and returns a value showing key pressed
- ********************************************************************/
-unsigned char ScanKey(void)
-{
-    unsigned int pressed = 0;
-    unsigned int OLDTRISE, OLDTRISF;
-    unsigned char i = 0;
-    unsigned char button[17] = {0x43, 0x39, 0x38, 0x37, 0x44, 0x23, 0x30, 0x2A, 0x42, 0x36, 0x35, 0x34, 0x41, 0x33, 0x32, 0x31, 0x20}; //key mapping V
-
-    OLDTRISE = TRISE;
-    OLDTRISF = TRISF;
-    TRISE = 0b0000000000111010;
-    TRISF = 0b0000000000000001;
-
-    _LATD0 = 1;
-    Nop();
-    pressed = ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
-    _LATD0 = 0;
-    _LATD11 = 1;
-    pressed = pressed << 5;
-    pressed += ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
-    _LATD11 = 0;
-    _LATD8 = 1;
-    pressed = pressed << 5;
-    pressed += ((PORTE & 0x0038) >> 1)+(PORTE & 0x0002)+((PORTF & 0x0002) >> 1);
-    _LATD8 = 0;
-
-    while (!(pressed & 0x0001)&&(i < 15))
-    {
-        i++;
-        pressed = pressed >> 1;
-    }
-
-    return button[i];
-}//end ScanKey
-
-/********************************************************************/
-void clrBUF(char *DATA, unsigned char count)
-{
-    unsigned char i;
-    for (i = 0; i < count; i++) *DATA = 0;
-}
-
-/********************************************************************/
-void extractSMS(char *DATA)
-{
-    unsigned char i;
-    i = SMScnt;
-    while (URXbuf[i + 47] != 0x0D) *DATA++ = URXbuf[47 + i++]; //47 is the SMS text location offset
-    *DATA = 0;
-}
-
-/********************************************************************/
-void extractNUM(char *DATA)
-{
-    unsigned char i;
-    i = SMScnt;
-    while (URXbuf[i + 6] != 0x22) *DATA++ = URXbuf[6 + i++]; //48 is the SMS text location offset
-    *DATA = 0;
-}
-
-/********************************************************************/
-void itostr(int i, char *p)
-{
-    char const digit[] = "0123456789";
-    if (i < 0)
-    {
-        *p++ = '-';
-        i *= -1;
-    }
-    int shifter = i;
-    while (shifter)
-    { //Move to where representation ends
-        ++p;
-        shifter = shifter / 10;
-    }
-    *p = '\0';
-    while (i)
-    { //Move back, inserting digits as u go
-        *--p = digit[i % 10]; //(i%10)+0x20;//
-        i = i / 10;
-    }
-}
-
-/********************************************************************/
-void addstr(char *p, char *q) //p destination string pointer needs to be an array q string to add can be from quotes
-{
-    while (*p) p++;
-    while (*q)
-    {
-        *p++ = *q++;
-    }
-    *p++ = *q++;
-}
-/********************************************************************/
 
 /** EOF main.c ***************************************************************/

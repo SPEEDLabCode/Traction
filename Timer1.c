@@ -53,29 +53,48 @@
 
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
 {
+    //TODO determine whether global interrupt disable should be run while in this ISR
     char *ptr;
-    if (tic1) tic1--; // Decrement tic1
-    if (tic2) tic2--; // Decrement tic2
+    if (tic1) 
+    {
+        tic1--; // Decrement tic1
+    }
+    if (tic2)
+    {
+        tic2--; // Decrement tic2
+    }
     if (tic3)
     {
-        tic3--;
+        tic3--; // Decrement tic3
     }
     else
     {
         if (WasDataRX) //Then it has been 100ms since data arrived. Should be ok to process
         {
-            //			print_string(URXbuf);
+            
             ptr = strstr((char*) URXbuf, "OK\r\n");
-            if (ptr != NULL) OKflg = ptr - URXbuf + 1;
+            if (ptr != NULL)
+            {
+                OKflg = ptr - URXbuf + 1;
+            }
             else OKflg = 0xFF;
             ptr = strstr((char*) URXbuf, "ERROR\r\n");
-            if (ptr != NULL) ERRflg = ptr - URXbuf + 1;
+            if (ptr != NULL)
+            {
+                ERRflg = ptr - URXbuf + 1;
+            }
             else ERRflg = 0xFF;
             ptr = strstr((char*) URXbuf, "+CMT:");
-            if (ptr != NULL) SMScnt = ptr - URXbuf + 1;
+            if (ptr != NULL)
+            {
+                SMScnt = ptr - URXbuf + 1;
+            }
             else SMScnt = 0xFF;
             ptr = strstr((char*) URXbuf, "+CMGS:");
-            if (ptr != NULL) SENT = ptr - URXbuf + 1;
+            if (ptr != NULL)
+            {
+                SENT = ptr - URXbuf + 1;
+            }
             else SENT = 0xFF;
 
             WasDataRX = 0;

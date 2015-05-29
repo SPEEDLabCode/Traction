@@ -1,7 +1,7 @@
 /*
  * File:   SIM800.c
  * Author:
- * E. Freund <eric@affinityengineering.com.au
+ * E. Freund <eric@affinityengineering.com.au>
  * W. Anthony <will@affinityengineering.com.au>
  * Description: This is the source file for the SIM800 multi-band
  * GSM Module.  This library contains functions to automate many of the
@@ -13,7 +13,7 @@
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
  * SIM800.h
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
@@ -23,7 +23,9 @@
  * REVISION / DATE: 1.05 / 31 JUL 2014
  *
  * Created on 16 April 2015, 11:43 PM
- * Copyright (C) 2015  Affinity Engineering pty ltd
+ * Copyright (C) 2015  Affinity Engineering pty. ltd.
+ * http://www.affinityengineering.com.au
+ * http://github.com/SPEEDLabCode
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,6 +45,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "SIM800.h"
 #include "USART.h"
 
@@ -82,9 +85,11 @@ void ATcommand(char *DATA)
     //FIXME validate input!
     USARTTX(0x41); //A
     USARTTX(0x54); //T
-    while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
+    while (*DATA) /*FIXME should determine length of data and use for loop.  This does not allow
+                   * for pre-defined loop behavior and may lead to a runaway condition */
     {
-        USARTTX(*DATA++);
+        USARTTX(*DATA++);   //Post-Increment pointer
+        
     }
     USARTTX(0x0D); //<cr>
 }
@@ -114,8 +119,9 @@ void SMSnumber(char *DATA)
  * DATE: 18 APR 2015
  *F*/
 {
-    //FIXME validate input!
-    ATstg("AT+CMGS=");
+    if (*DATA != NULL)
+    {
+        ATstg("AT+CMGS=");
     USARTTX(0x22); //"
     while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
     {
@@ -123,10 +129,12 @@ void SMSnumber(char *DATA)
     }
     USARTTX(0x22); //"
     USARTTX(0x0D); //<cr>
+    }
+    
 }
 //********************************************************************
 
-void SMStext(char* DATA)
+void SMStext(char *DATA)
 /* FUNCTION: SMStext()
  * PURPOSE : Automate the USART transmission of SMS message content
  * ARGUMENTS:
@@ -149,16 +157,20 @@ void SMStext(char* DATA)
  * DATE: 18 APR 2015
  *F*/
 {
-    //FIXME validate input!
-    while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
+    if(*DATA != NULL)
+    {
+        while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
     {
         USARTTX(*DATA++); //FIXME should be USARTTXstg()?
     }
-    USARTTX(0x1A); //<^Z>
+        USARTTX(0x1A); //<^Z>
+    }
+    
+    
 }
 //********************************************************************
 
-void ATstg(char* DATA)
+void ATstg(char *DATA)
 /* FUNCTION: ATstg()
  * PURPOSE : Automate the USART transmission of unformatted strings
  * ARGUMENTS:
@@ -181,11 +193,14 @@ void ATstg(char* DATA)
  * DATE: 18 APR 2015
  *F*/
 {
-    //FIXME validate input!
-    while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
+    if (*DATA != NULL)
+    {
+        while (*DATA) //FIXME should determine length of data and use for.  Provides pre-defined exit.
     {
         USARTTX(*DATA++); //FIXME should be USARTTXstg()?
     }
+    }
+    
 }
 
 //********************************************************************
@@ -229,12 +244,9 @@ char SendReply(char *NUM, char *DATA) //TODO check on the logic and flow control
         while (tic1 && (OKflg == 0xFF));
     }
     OKflg = 0xFF;
-    //				while (OKflg == 0xFF) {SMSnumber(*&NUM);tic1 = 500;while (tic1&&(OKflg == 0xFF));}
     SMSnumber(*&NUM);
     tic1 = 100;
     while (tic1);
-    //print_string(*&DATA);
-    //				OKflg = 0xFF;
     SMStext(*&DATA);
     ERRflg = 0xFF;
     SENT = 0xFF;
@@ -421,7 +433,7 @@ bool SetSMSFormat(bool text)
 {
     bool status = false;
 
-    if (text = true)
+    if (text == true)
     {
         //set SMS text format
         ATcommand("+CMGF=1");
@@ -475,3 +487,26 @@ bool ChannelQual(void)
     return status;
 }
 //********************************************************************
+
+void extractSMS(char *DATA)
+{
+    uint8_t i = 0;
+    i = SMScnt;
+    while (URXbuf[i + 47] != 0x0D)
+    {
+        *DATA++ = URXbuf[47 + i++]; //47 is the SMS text location offset
+    }
+    *DATA = 0;
+}
+
+/********************************************************************/
+void extractNUM(char *DATA)
+{
+    uint8_t i = 0;
+    i = SMScnt;
+    while (URXbuf[i + 6] != 0x22)
+    {
+        *DATA++ = URXbuf[6 + i++]; //48 is the SMS text location offset
+    }
+    *DATA = 0;
+}

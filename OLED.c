@@ -2,23 +2,22 @@
  * File:   OLED.c
  * Author:  Eric Freund <eric@affinityengineering.com.au>
  *          Will Anthony <will@affinityengineering.com.au>
- * Description: This is the source file for the display module.
+ * Description: This is the source file for the Univision OLED display module.
  * 
- *
  * Language: C (CCI)
  * Coding Standard: NASA JPL DOCID D-60411
  * Style: NASA SEL-94-003
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
  * USART.h
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  * 
- * Reference Document: 
- * Document Number: 
- * Revision / Date: 
+* Reference Document: Product Specification OEL Display Module UG-2864HLBEG01
+ * Document Number: SAS1-9068-A
+ * Revision / Date: A / 7 SEP 2009
  *
  * Created on 27 April 2015, 11:23 AM
  * Copyright (C) 2010-2015  Affinity Engineering pty. ltd.
@@ -42,6 +41,7 @@
 /** INCLUDES *******************************************************/
 
 #include "OLED.h"
+#include "TractionHardware.h"
 
 //*******************************************************
 extern volatile uint8_t crtX, crtY;
@@ -103,9 +103,8 @@ void initOLED(void)
 
 void OLEDcmd(uint8_t DATA)
 {
-    //int i;
     D_C = 0; //Set Data or command line accordingly D = 1 C = 0
-    R_W = 0; //We are writting
+    R_W = 0; //We are writing
     E_R = 1; //E line low
     CS = 0;
     LATE = 0x00FF & DATA;
@@ -118,9 +117,8 @@ void OLEDcmd(uint8_t DATA)
 
 void OLEDdata(uint8_t DATA)
 {
-    //int i;
     D_C = 1; //Set Data or command line accordingly D = 1 C = 0
-    R_W = 0; //We are writting
+    R_W = 0; //We are writing
     E_R = 1; //E line low
     CS = 0;
     LATE = 0x00FF & DATA;
@@ -133,7 +131,7 @@ void OLEDdata(uint8_t DATA)
 
 void ClearOLED(void)
 {
-    uint8_t i, j;
+    uint8_t i = 0, j = 0;
 
     for (i = 0; i < 8; i++)
     {
@@ -172,6 +170,7 @@ void print_string(char *message) // Write message to LCD (C string type) this wi
 
 void print_string_XY(char *message, uint8_t X, uint8_t Y) // Write message to LCD this will wrap at the edge
 {
+    //TODO clean up this function and verify it's operation
     //	Y = Y%8;
     //	if (X > (15 * 6)) {X = 0; Y++;}
     //	X = (X/6)*6;
@@ -212,13 +211,13 @@ void print_big_num(uint16_t num, uint16_t x, uint16_t y)
     for (j = 0; j < 3; j++)
     {
         Gotoxy(x, y + j);
-        //		OLEDdata(0);
+       
         OLEDdata(0);
         for (i = 0; i < 12; ++i)
         {
             OLEDdata(bignum[j][i + (num * 12)]);
         }
-        //		OLEDdata(0);
+        
         OLEDdata(0);
     }
 }
@@ -226,6 +225,7 @@ void print_big_num(uint16_t num, uint16_t x, uint16_t y)
 
 void printSCN(char DATA) // Write char to LCD this will wrap at the edge and at the bottom
 {
+    //FIXME is this DATA input variable a character or a signed char (int8_t)?  
     uint8_t i = 0;
     if (DATA == 0x0A)
     {

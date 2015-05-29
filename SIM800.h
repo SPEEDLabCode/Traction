@@ -11,13 +11,15 @@
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
  * USART.h
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  *
  * Created on 16 April 2015, 11:43 PM
- * Copyright (C) 2015  Affinity Engineering pty ltd
+ * Copyright (C) 2015  Affinity Engineering pty. ltd.
+ * http://www.affinityengineering.com.au
+ * http://github.com/SPEEDLabCode
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,10 +66,13 @@ Function prototypes
     char SendReply(char *, char *);
     bool Hangup(void);
     bool ChannelQual(void);
+    void extractSMS(char);
+    void extractNUM(char);
    
     /* Bluetooth Functions */
-    bool BTpower(bool);
-    bool BTstatus(bool);
+    bool BTpower(bool, bool);
+    bool BTstatus(uint8_t);
+    
     
 
 #ifdef	__cplusplus

@@ -16,12 +16,15 @@
  * stddef.h
  * stdbool.h
  * stdint.h
+ * uart.h
  *
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  *
  * Created on 02 March 2014, 11:23 AM
- * Copyright (C) 2014-2015  Affinity Engineering pty ltd
+ * Copyright (C) 2014-2015  Affinity Engineering pty. ltd.
+ * <http://www.affinityengineering.com.au>
+ * <http://github.com/SPEEDLabCode>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,29 +41,30 @@
  */
 
 /* Include Global Parameters */
-
+#include <xc.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <uart.h>
 #include "USART.h"
 
+/* INTERRUPT SERVICE ROUTINES */
+/* NOTE: These ISR's are performing application specific functions, they 
+ are not perfectly abstract.*/
 
 /********************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 {
-    unsigned char temp;
+    uint8_t temp;
     while (U1STAbits.URXDA)
     {
         temp = U1RXREG;
         printSCN(temp);
         URXbuf[RXbufCnt++] = temp;
-        if (RXbufCnt == 255) RXbufCnt = 0;
-        //		if ((URXbuf[RXbufCnt-1] == 0x0A)&&(URXbuf[RXbufCnt-2] == 0x0D))
-        //		{
-        //		 	DataRXflag = 1;
-        //			URXbuf[RXbufCnt-2] = 0;
-        //			RXbufCnt -= 2;
-        //		}
+        if (RXbufCnt == 255)
+        {
+            RXbufCnt = 0;
+        }
         DataRXflag = 1;
     }
     if (U1STAbits.OERR)
@@ -72,62 +76,22 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
     IFS0bits.U1RXIF = 0;
 }
 
-//********************************************************************
-
-void initUSART(void)
-{
-    //UxBRG = ((FCY/Desired Baud Rate)/16) – 1
-    //U1BRG 	= 25;//((4000000/9600)/16) – 1;
-    U1BRG = 69;
-    U1MODE = 0b1000000000001000;
-    U1STAbits.UTXEN = 1;
-    IFS0bits.U1RXIF = 0;
-    IEC0bits.U1RXIE = 1;
-}
-//********************************************************************
-
-void USARTTX(unsigned char DATA)
-{
-    //TODO change to a for loop over the length of the data
-    while (U1STAbits.UTXBF);
-    U1TXREG = DATA;
-}
-//********************************************************************
-
-void USARTTXstg(unsigned char *DATA)
-{
-    //FIXME validate input!
-    while (*DATA)
-    {
-        USARTTX(*DATA++);
-    }
-    USARTTX(0x0D); //<cr>
-}
-
-//********************************************************************
-
-void Dis_USART(void)    //FIXME change name to Disable_UART
-{
-    U2MODE = 0x0000;
-}
-/**************************************************************/
-
-/**********************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _U2RXInterrupt(void)
 {
-    volatile unsigned char temp;
-    extern unsigned int sizeG;
+    volatile uint8_t temp;
+    extern uint16_t sizeG;
     extern char dataG[];
-    extern unsigned char valid_data;
-    //extern unsigned int GPSto;
+    extern uint8_t valid_data;
 
-    //GPSto = 0;
-    IFS1bits.U2RXIF = 0;
+    IFS1bits.U2RXIF = 0; //Clear Interrupt flag
     temp = 0;
     while ((U2STAbits.URXDA) && (temp != 0x0A))
     {
         temp = U2RXREG;
-        if (temp == 36) sizeG = 0; //Wait for first $ of next NMEA data packet
+        if (temp == 36)
+        {
+            sizeG = 0; //Wait for first $ of next NMEA data packet
+        }
         dataG[sizeG++] = temp; //Always align received string to first "$"
     }
     if ((temp == 0x0A) && (sizeG > 2))
@@ -148,14 +112,94 @@ void __attribute__((__interrupt__, no_auto_psv)) _U2RXInterrupt(void)
         dataG[0] = 0;
     }
     dataG[255] = 0;
-    
+
 }
 
 /******************************************************************************************/
 
+//********************************************************************
+
+void initUSART(void)//TODO re-code so that both USART in use are configured
+{
+    //UxBRG = ((FCY/Desired Baud Rate)/16) – 1
+    //U1BRG 	= 25;//((4000000/9600)/16) – 1;
+    /* Configure UART1 module to transmit 8 bit data with one stopbit. */
+    U1MODEvalue = UART_EN & UART_IDLE_CON & 
+                  UART_DIS_WAKE & 
+                  UART_EN_ABAUD & UART_NO_PAR_8BIT  &
+                  UART_1STOPBIT;
+    U1STAvalue  = UART_INT_TX_BUF_EMPTY  &  
+                  UART_TX_PIN_NORMAL &
+                  UART_TX_ENABLE & UART_INT_RX_3_4_FUL &
+                  UART_ADR_DETECT_DIS &
+                  UART_RX_OVERRUN_CLEAR;
+    OpenUART1(U1MODEvalue, U1STAvalue, baudvalue);
+    
+    /* Configure UART2 module to transmit 8 bit data with one stopbit.  */
+    U2BRG = 69;
+    U2MODE = 0b1000000000001000;
+    U2STAbits.UTXEN = 1;
+    IFS1bits.U2RXIF = 0;
+    IEC1bits.U2RXIE = 1;
+    
+}
+//********************************************************************
+
+void USARTTX(uint8_t number, uint8_t DATA)
+{
+    if (number > 0 && number <= USART_TRANSCIEVERS)
+    {
+        if (number == 1)
+        {
+    while (U1STAbits.UTXBF);
+    U1TXREG = DATA;
+        }
+        if (number == 2)
+        {
+            while(U2STAbits.UTXBF);
+            U2TXREG = DATA;
+        }
+    }
+    
+}
+//********************************************************************
+
+void USARTTXstg(uint8_t *DATA)//TODO re-code to take USART number argument
+{
+    //FIXME validate input!
+
+    while (*DATA)
+    {
+        USARTTX(*DATA++);
+    }
+    USARTTX(0x0D); //<cr>
+}
+
+/**************************************************************/
+void USART_Disable(uint8_t number)  //DEPRECATED
+/* NOTE: Deprecated.  Use CloseUARTx() XC compiler built-in instead.*/
+{
+    //validate input
+    if(number > 0 && number <= USART_TRANSCIEVERS)
+    {
+        if(number == 1)
+        {
+            CloseUART1();
+        }
+        if(number == 2)
+        {
+            CloseUART2();
+        }
+    }
+    
+}
+
+/**********************************************/
+
+
 char UART2GetChar(void)
 {
-    char Temp;  //FIXME change variable names as this is wrong
+    char Temp; //FIXME change variable names as this is wrong
     extern int T1cnt;
     T1cnt = 10;
     if (U2STAbits.OERR) U2STAbits.OERR = 0;
@@ -177,11 +221,11 @@ void UART2PutChar(char ch)
 void UART2PrintString(char *str)
 {
 
-    if(*str != NULL)
+    if (*str != NULL)
     {
         //TODO check length of string and convert while to for loop
-    while (*str)
-        UART2PutChar(*str++);
+        while (*str)
+            UART2PutChar(*str++);
     }
 }
 /******************************************************************************************/

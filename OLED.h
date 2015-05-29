@@ -11,14 +11,14 @@
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
  * USART.h
  * Compiler: Microchip XC16
  * Compiler Revision: 1.24
  * 
- * Reference Document: 
- * Document Number: 
- * Revision / Date: 
+ * Reference Document: Product Specification OEL Display Module UG-2864HLBEG01
+ * Document Number: SAS1-9068-A
+ * Revision / Date: A / 7 SEP 2009
  *
  * Created on 27 April 2015, 11:23 AM
  * Copyright (C) 2010-2015  Affinity Engineering pty. ltd.
@@ -51,6 +51,11 @@ extern "C" {
     /*********************************************************************
     Defines
      ********************************************************************/
+/*
+ * NOTE: These #defines have been placed in the TractionHardware.h header file
+ * for the purposes of I/O definition housekeeping.  They are maintained here for
+ * reference purposes.
+ * 
 #define HVEN	_LATC13
 #define	OLEDVDD _LATC14
 #define BS1		_LATD1
@@ -60,6 +65,7 @@ extern "C" {
 #define D_C		_LATD5
 #define R_W		_LATD6
 #define E_R		_LATD7
+ * /
 
     /*********************************************************************
     Function prototypes
@@ -71,8 +77,8 @@ extern "C" {
     void print_string(char*);
     void print_message(const char*);
     void print_char(char);
-    void Gotoxy(char, char);
-    void print_big_num(unsigned int, unsigned int, unsigned int);
+    void Gotoxy(int8_t, int8_t);
+    void print_big_num(uint16_t, uint16_t, uint16_t);
     void print_string_XY(char*, unsigned char, unsigned char);
     void printSCN(char);
 

@@ -11,7 +11,7 @@
  * License: GNU GPL version 3.0
  * Version: 1.0
  *
- * Dependancies:
+ * Dependencies:
  * 
  * 
  * Compiler: Microchip XC16
@@ -50,6 +50,7 @@ extern "C" {
 /*********************************************************************
 Defines
 ********************************************************************/
+    
 
 /*********************************************************************
 Globals
@@ -58,13 +59,19 @@ Globals
 /*********************************************************************
 Function prototypes
 ********************************************************************/
-    void gps_NMEA_comand(unsigned char*);
-    void gps_UBX_command(unsigned char*);
+    void gps_NMEA_comand(uint8_t*);
+    void gps_UBX_command(uint8_t*);
 
-    void gps_chksum(unsigned char, unsigned char*);
+    void gps_chksum(uint8_t, uint8_t*);
+    
+    void ubx_ReceiveDataByte(uint8_t);
+    uint8_t ubx_CheckTimeout();
+    uint8_t ubx_GetTimeout();
+    
+    void ubx_GetGPSData(gps_Data*);   //FIXME data type comes from a type enum?
 
     void PollJammingDetection(void);
-    void ConfigJammingDetection(unsigned char*);
+    void ConfigJammingDetection(uint8_t*);
 
 
 #ifdef	__cplusplus

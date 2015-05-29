@@ -24,7 +24,9 @@
  * Revision / Date: C / 16 DEC 2009
  *
  * Created on 02 March 2014, 11:23 AM
- * Copyright (C) 2014-2015  Affinity Engineering pty ltd
+ * Copyright (C) 2014-2015  Affinity Engineering pty. ltd.
+ * <http://www.affinityengineering.com.au>
+ * <http://github.com/SPEEDLabCode>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,26 +52,27 @@ extern "C" {
 /*********************************************************************
 Defines
 ********************************************************************/
+#define USART_TRANSCIEVERS 2    //SET THIS VALUE FOR THE NUMBER OF ONBOARD USARTS IN USE
 
 /*********************************************************************
 Globals
 ********************************************************************/
-extern volatile unsigned char DataRXflag;
+extern volatile uint8_t DataRXflag;
 extern volatile char URXbuf[];
-extern volatile unsigned int RXbufCnt;
-extern volatile unsigned char DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
-extern volatile unsigned int tic1, tic2, tic3;
+extern volatile uint16_t RXbufCnt;
+extern volatile uint8_t DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
+extern volatile uint16_t tic1, tic2, tic3;
 /*********************************************************************
 Function prototypes
 ********************************************************************/
-void initUSART();
-void USARTTX(unsigned char);
-void USARTTXstg(unsigned char*);
-void USARTRX(unsigned char*);
-void Dis_USART(void); 
-void UART2PutChar(char); 
-char UART2GetChar(void);
-void UART2PrintString(char*);
+void initUSART();       //Initializes all USARTS onboard
+void USARTTX(uint8_t , uint8_t);  //TODO re-code to take USART number argument
+void USARTTXstg(uint8_t*);  //TODO re-code to take USART number argument
+void USARTRX(uint8_t*); //TODO re-code to take USART number argument
+void USART_Disable(uint8_t);    
+void UART2PutChar(char); //TODO re-code to take USART number argument
+char UART2GetChar(void);//TODO re-code to take USART number argument
+void UART2PrintString(char*);//TODO re-code to take USART number argument
 
 //********************************************************************
 
