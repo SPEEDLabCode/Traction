@@ -62,6 +62,10 @@ extern volatile char URXbuf[];
 extern volatile uint16_t RXbufCnt;
 extern volatile uint8_t DataRXflag, WasDataRX, OKflg, ERRflg, SMScnt, SENT;
 extern volatile uint16_t tic1, tic2, tic3;
+
+unsigned char Rxdata[10];
+unsigned char DataAvailable=0;
+unsigned char Txdata[] = "Microchip";
 /*********************************************************************
 Function prototypes
 ********************************************************************/

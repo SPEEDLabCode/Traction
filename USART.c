@@ -53,6 +53,35 @@
  are not perfectly abstract.*/
 
 /********************************************************************/
+
+/* USART 2 Interrupts as per Microchip PIC24F peripheral function documentation */
+void __attribute__ ((interrupt,no_auto_psv)) _U2TXInterrupt(void)
+{
+   static uint16_t i=0;
+   U2TX_Clear_Intr_Status_Bit;
+   if(Txdata[i]!='\0')
+    {
+      while(BusyUART2());
+      WriteUART2((unsigned int)Txdata[i++]);
+    }
+   else
+    {
+      DisableIntU2TX;
+      DataAvailable = 1;
+    }
+}
+
+void __attribute__ ((interrupt,no_auto_psv)) _U2RXInterrupt(void)
+{
+   static uint16_t j=0;
+   U2RX_Clear_Intr_Status_Bit;
+   while(!DataRdyUART2());
+   Rxdata[j++] = ReadUART2();
+   if(j == 10)
+      DataAvailable=1;
+}
+
+/* USART 1 interrupts as written */
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 {
     uint8_t temp;
